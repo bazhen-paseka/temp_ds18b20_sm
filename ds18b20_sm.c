@@ -2,6 +2,8 @@
 
 /***************************************************************/
 
+extern UART_HandleTypeDef huart1;
+
 /***************************************************************/
 
 	char DataChar[100];
@@ -11,6 +13,31 @@
 #define CHECK_BIT(var, pos) (((var) & (1UL << (pos))) != 0)
 //#define SET_BIT(var, pos) ((var) |= (1UL << (pos)))
 #define CLR_BIT(var, pos) (var &= ~(1UL << (pos)))
+/***************************************************************/
+
+void DS18b20_Read_scratchpad(char * _scratchpad){
+	uint8_t present = DS18b20_Start_strob();
+	if (present){
+		HAL_Delay(1);
+		//DS18b20_Send_byte(0xCC);	//	SKIP ROM
+		DS18b20_Send_byte(0xBE);	//	Read Scratchpad
+		for (int i = 0; i<9; i++) {
+			_scratchpad[i] = DS18b20_Read_byte();
+		}
+	}
+}
+
+void DS18b20_Get_serial_number(char * _serial_numb){
+	uint8_t present = DS18b20_Start_strob();
+	if (present){
+		DS18b20_Send_byte(0xCC);	//	SKIP ROM
+		//DS18b20_Send_byte(0x33);	//	READ ROM
+		for (int i = 0; i<8; i++) {
+			_serial_numb[i] = DS18b20_Read_byte();
+		}
+	}
+
+}
 
 /***************************************************************/
 void DS18b20_Delay(unsigned int t) {
@@ -64,6 +91,7 @@ uint8_t DS18b20_Start_strob(void){
 	GPIO_PinState res = HAL_GPIO_ReadPin(DQ1_GPIO_Port, DQ1_Pin);
 	HAL_GPIO_TogglePin(TEST_GPIO_Port, TEST_Pin);
 	if (res == GPIO_PIN_RESET){
+		DS18b20_Delay(1555);
 		return 1;
 	}
 	return 0;
