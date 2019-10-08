@@ -8,7 +8,7 @@
 /***************************************************************/
 
 /***************************************************************/
-void DS18b20_Read_scratchpad(char * _scratchpad);
+void DS18b20_Read_scratchpad(char * _scratchpad, char * _serial_numb);
 void DS18b20_Get_serial_number(char * _serial_numb);
 void DS18b20_Send_byte (uint8_t _byte);
 void DS18b20_Send_bit (uint8_t _bit);

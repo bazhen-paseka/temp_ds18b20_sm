@@ -15,30 +15,32 @@ extern UART_HandleTypeDef huart1;
 #define CLR_BIT(var, pos) (var &= ~(1UL << (pos)))
 /***************************************************************/
 
-void DS18b20_Read_scratchpad(char * _scratchpad){
+void DS18b20_Get_serial_number(char * _serial_numb){
 	uint8_t present = DS18b20_Start_strob();
 	if (present){
-		HAL_Delay(1);
-		//DS18b20_Send_byte(0xCC);	//	SKIP ROM
+		DS18b20_Send_byte(0xCC);	//	SKIP ROM -> serial numb
+		//DS18b20_Send_byte(0x33);	//	READ ROM
+		for (int i = 0; i<8; i++) {
+			_serial_numb[i] = DS18b20_Read_byte();
+		}
+	}
+}
+/***************************************************************/
+
+void DS18b20_Read_scratchpad(char * _scratchpad, char * _serial_numb){
+	uint8_t present = DS18b20_Start_strob();
+	if (present){
+		//HAL_Delay(1);
+		DS18b20_Send_byte(0x55);
+		for (int i = 0; i<8; i++) {
+			DS18b20_Send_byte(_serial_numb[i]);
+		}
 		DS18b20_Send_byte(0xBE);	//	Read Scratchpad
 		for (int i = 0; i<9; i++) {
 			_scratchpad[i] = DS18b20_Read_byte();
 		}
 	}
 }
-
-void DS18b20_Get_serial_number(char * _serial_numb){
-	uint8_t present = DS18b20_Start_strob();
-	if (present){
-		DS18b20_Send_byte(0xCC);	//	SKIP ROM
-		//DS18b20_Send_byte(0x33);	//	READ ROM
-		for (int i = 0; i<8; i++) {
-			_serial_numb[i] = DS18b20_Read_byte();
-		}
-	}
-
-}
-
 /***************************************************************/
 void DS18b20_Delay(unsigned int t) {
 	for (; t > 0; t--) {
@@ -77,9 +79,9 @@ void DS18b20_Send_byte (uint8_t _byte)
 
 void DS18b20_Send_bit (uint8_t _bit) {
 	HAL_GPIO_WritePin(DQ2_GPIO_Port, DQ2_Pin, GPIO_PIN_RESET);
-	DS18b20_Delay(50 + _bit*300);
+	DS18b20_Delay(350 - _bit * 300);
 	HAL_GPIO_WritePin(DQ2_GPIO_Port, DQ2_Pin, GPIO_PIN_SET);
-	DS18b20_Delay(700 - _bit*300);
+	DS18b20_Delay(400 + _bit * 300);
 }
 /***************************************************************/
 uint8_t DS18b20_Start_strob(void){
