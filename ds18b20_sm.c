@@ -30,7 +30,6 @@ void DS18b20_Get_serial_number(char * _serial_numb){
 void DS18b20_Read_scratchpad(char * _scratchpad, char * _serial_numb){
 	uint8_t present = DS18b20_Start_strob();
 	if (present){
-		//HAL_Delay(1);
 		DS18b20_Send_byte(0x55);
 		for (int i = 0; i<8; i++) {
 			DS18b20_Send_byte(_serial_numb[i]);
@@ -42,6 +41,19 @@ void DS18b20_Read_scratchpad(char * _scratchpad, char * _serial_numb){
 	}
 }
 /***************************************************************/
+
+void ConvertTemp( char * _serial_numb){
+	uint8_t present = DS18b20_Start_strob();
+	if (present){
+		DS18b20_Send_byte(0x55);
+		for (int i = 0; i<8; i++) {
+			DS18b20_Send_byte(_serial_numb[i]);
+		}
+		DS18b20_Send_byte(0x44);	//	Read Scratchpad
+	}
+}
+/***************************************************************/
+
 void DS18b20_Delay(unsigned int t) {
 	for (; t > 0; t--) {
 		__asm("nop");
