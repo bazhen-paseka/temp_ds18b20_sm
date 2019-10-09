@@ -7,21 +7,24 @@
 	#include <stdio.h>
 /***************************************************************/
 
-/***************************************************************/
-void ConvertTemp( char * _serial_numb);
-void DS18b20_Read_scratchpad(char * _scratchpad, char * _serial_numb);
+int DS18b20_Get_temp_MatchROM(char * _serial_numb);
+int DS18b20_Get_Temp_SkipROM (void);
+
+uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len);
+
+void DS18b20_ConvertTemp_MatchROM( char * _serial_numb);
+void DS18b20_ConvertTemp_SkipROM (void);
+void DS18b20_ReadScratchpad_MatchROM(char * _scratchpad, char * _serial_numb);
+void DS18b20_ReadScratchpad_SkipROM (char * _scratchpad);
+
 void DS18b20_Get_serial_number(char * _serial_numb);
-void DS18b20_Send_byte (uint8_t _byte);
-void DS18b20_Send_bit (uint8_t _bit);
-uint8_t DS18b20_Read_byte(void);
-uint8_t DS18b20_Start_strob(void);
-void DS18b20_Delay(unsigned int t);
+void DS18b20_Print_serial_number(UART_HandleTypeDef * uart);
 
 /***************************************************************/
-
 /***************************************************************/
 
-/***************************************************************/
-
+//		char serial_number[8] = {0x28, 0xFF, 0x55, 0x64, 0x4C, 0x04, 0x00, 0x20};
+//		char serial_number[8];
+//		DS18b20_Print_serial_number(&huart1);
 
 #endif	//	TEMP_DS18B20_SM_H_INCLUDED
