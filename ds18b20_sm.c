@@ -22,6 +22,11 @@
 
 // extern UART_HandleTypeDef huart1;
 
+uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len);
+void DS18b20_ReadScratchpad_MatchROM(char * _scratchpad, char * _serial_numb);
+void DS18b20_ReadScratchpad_SkipROM (char * _scratchpad);
+void DS18b20_Get_serial_number(char * _serial_numb);
+
 void Send_serial( char * _serial_numb);
 void Read_serial(char * _serial_numb);
 
@@ -63,7 +68,7 @@ uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len) {
 int DS18b20_Get_temp_MatchROM(char * _serial_numb) {
 	char scratchpad[9];
 	DS18b20_ReadScratchpad_MatchROM(scratchpad, _serial_numb);
-	return (scratchpad[1]<<8) | scratchpad[0];
+	return 100 * ((scratchpad[1]<<8) | scratchpad[0]);
 }
 /***************************************************************/
 

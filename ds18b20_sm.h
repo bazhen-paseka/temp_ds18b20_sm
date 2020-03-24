@@ -7,17 +7,12 @@
 	#include <stdio.h>
 /***************************************************************/
 
-int DS18b20_Get_temp_MatchROM(char * _serial_numb);
+void DS18b20_ConvertTemp_SkipROM (void);
 int DS18b20_Get_Temp_SkipROM (void);
 
-uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len);
-
 void DS18b20_ConvertTemp_MatchROM( char * _serial_numb);
-void DS18b20_ConvertTemp_SkipROM (void);
-void DS18b20_ReadScratchpad_MatchROM(char * _scratchpad, char * _serial_numb);
-void DS18b20_ReadScratchpad_SkipROM (char * _scratchpad);
+int DS18b20_Get_temp_MatchROM(char * _serial_numb);
 
-void DS18b20_Get_serial_number(char * _serial_numb);
 void DS18b20_Print_serial_number(UART_HandleTypeDef * uart);
 
 /***************************************************************/
