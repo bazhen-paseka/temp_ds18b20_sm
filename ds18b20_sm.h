@@ -23,6 +23,9 @@ void DS18b20_Print_serial_number(UART_HandleTypeDef * uart);
 /***************************************************************/
 /***************************************************************/
 
+//	DQ_WRITE	GPIO_Output;	Pull_up;	Open Drain;		level:High;		speed:High;		PA1
+//	DQ_READ		GPIO_Input;		Pull_up;													PA0
+
 //		char serial_number[8] = {0x28, 0xFF, 0x55, 0x64, 0x4C, 0x04, 0x00, 0x20};
 //		char serial_number[8];
 //		DS18b20_Print_serial_number(&huart1);

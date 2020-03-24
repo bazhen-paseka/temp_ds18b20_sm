@@ -45,8 +45,7 @@ void local_delay(unsigned int t);
 #define CLR_BIT(var, pos) (var &= ~(1UL << (pos)))
 
 /***************************************************************/
-uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len)
-{
+uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len) {
 	uint8_t crc = 0;
 	while (len--) {
 		uint8_t inbyte = *addr++;
@@ -225,7 +224,7 @@ void Send_serial( char * _serial_numb){
 
 void local_delay(unsigned int t) {
 	for (; t > 0; t--) {
-		__asm("nop");
+		__asm("nop");	//	f103 72MHz
 	}
 }
 /***************************************************************/
