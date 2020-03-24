@@ -22,6 +22,11 @@
 
 // extern UART_HandleTypeDef huart1;
 
+uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len);
+void DS18b20_ReadScratchpad_MatchROM(char * _scratchpad, char * _serial_numb);
+void DS18b20_ReadScratchpad_SkipROM (char * _scratchpad);
+void DS18b20_Get_serial_number(char * _serial_numb);
+
 void Send_serial( char * _serial_numb);
 void Read_serial(char * _serial_numb);
 
@@ -45,8 +50,7 @@ void local_delay(unsigned int t);
 #define CLR_BIT(var, pos) (var &= ~(1UL << (pos)))
 
 /***************************************************************/
-uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len)
-{
+uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len) {
 	uint8_t crc = 0;
 	while (len--) {
 		uint8_t inbyte = *addr++;
@@ -64,7 +68,7 @@ uint8_t DS18B20_CRC8(uint8_t *addr, uint8_t len)
 int DS18b20_Get_temp_MatchROM(char * _serial_numb) {
 	char scratchpad[9];
 	DS18b20_ReadScratchpad_MatchROM(scratchpad, _serial_numb);
-	return (scratchpad[1]<<8) | scratchpad[0];
+	return 100 * ((scratchpad[1]<<8) | scratchpad[0]);
 }
 /***************************************************************/
 
@@ -225,7 +229,7 @@ void Send_serial( char * _serial_numb){
 
 void local_delay(unsigned int t) {
 	for (; t > 0; t--) {
-		__asm("nop");
+		__asm("nop");	//	f103 72MHz
 	}
 }
 /***************************************************************/
