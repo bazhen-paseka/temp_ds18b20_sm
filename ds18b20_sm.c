@@ -228,7 +228,7 @@ void Send_serial( char * _serial_numb){
 /***************************************************************/
 
 void local_delay(unsigned int t) {
-	t = t / 9 ;
+	t = (DS18B20_HSE_DIVISION * t) / 1000 ;
 	for (; t > 0; t--) {
 		__asm("nop");	//	f103 72MHz
 	}
