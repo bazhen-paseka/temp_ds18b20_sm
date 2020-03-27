@@ -228,6 +228,7 @@ void Send_serial( char * _serial_numb){
 /***************************************************************/
 
 void local_delay(unsigned int t) {
+	t = t / 9 ;
 	for (; t > 0; t--) {
 		__asm("nop");	//	f103 72MHz
 	}
