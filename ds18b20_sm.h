@@ -5,6 +5,8 @@
 	#include "main.h"
 	#include <string.h>
 	#include <stdio.h>
+	#include "ds18b20_local_config.h"
+
 /***************************************************************/
 
 void DS18b20_ConvertTemp_SkipROM (void);
