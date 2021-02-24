@@ -229,7 +229,8 @@ void Send_serial( char * _serial_numb){
 
 void local_delay(unsigned int t) {
 	//t = (DS18B20_HSE_DIVISION * t) / 1000 ; 	//	16MHz
-	t = (DS18B20_HSE_DIVISION * t) / 500 ;		//	32MHz
+	//t = (DS18B20_HSE_DIVISION * t) / 500 ;	//	32MHz
+	t = (DS18B20_HSE_DIVISION * t) / 250 ;		//	64MHz
 	for (; t > 0; t--) {
 		__asm("nop");	//	f103 72MHz
 	}
