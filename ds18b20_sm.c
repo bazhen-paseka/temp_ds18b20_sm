@@ -37,7 +37,7 @@ void Send_bit (uint8_t _bit);
 uint8_t Read_byte(void);
 uint8_t Start_strob(void);
 
-void Delay18b20(uint32_t _delay_u32);
+void local_delay_DS18b20(uint32_t _delay_u32);
 
 /***************************************************************/
 
@@ -155,10 +155,10 @@ uint8_t Read_byte(void) {
 	for (int i = 0; i < BIT_IN_BYTE; i++) {
 
 		HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_RESET);
-		Delay18b20(20);
+		local_delay_DS18b20(20);
 		HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_SET);
 
-		Delay18b20(80);
+		local_delay_DS18b20(80);
 
 		GPIO_PinState res = HAL_GPIO_ReadPin(DQ_READ_GPIO_Port, DQ_READ_Pin);
 
@@ -166,7 +166,7 @@ uint8_t Read_byte(void) {
 			CLR_BIT(read_byte_u8,i);
 		}
 
-		Delay18b20(200);
+		local_delay_DS18b20(200);
 	}
 	return read_byte_u8;
 }
@@ -182,21 +182,21 @@ void Send_byte (uint8_t _byte)
 
 void Send_bit (uint8_t _bit) {
 	HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_RESET);
-	Delay18b20(350 - _bit * 300);
+	local_delay_DS18b20(350 - _bit * 300);
 	HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_SET);
-	Delay18b20(400 + _bit * 300);
+	local_delay_DS18b20(400 + _bit * 300);
 }
 /***************************************************************/
 uint8_t Start_strob(void){
 	HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_RESET);
-	Delay18b20(5000);
+	local_delay_DS18b20(5000);
 	HAL_GPIO_WritePin(DQ_WRITE_GPIO_Port, DQ_WRITE_Pin, GPIO_PIN_SET);
 
-	Delay18b20(600);
+	local_delay_DS18b20(600);
 	GPIO_PinState res = HAL_GPIO_ReadPin(DQ_READ_GPIO_Port, DQ_READ_Pin);
 
 	if (res == GPIO_PIN_RESET){
-		Delay18b20(1555);
+		local_delay_DS18b20(1555);
 		return 1;
 	}
 	return 0;
@@ -224,7 +224,7 @@ void Send_serial( char * _serial_numb){
 }
 /***************************************************************/
 
-void Delay18b20(uint32_t _delay_u32) {
+void local_delay_DS18b20(uint32_t _delay_u32) {
 	_delay_u32 = (_delay_u32 * 300) / COEFFICIENT;
 	for (; _delay_u32 > 0; _delay_u32--) {
 		__asm("nop");
