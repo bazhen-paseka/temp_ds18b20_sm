@@ -20,6 +20,7 @@ void DS18b20_Print_serial_number(UART_HandleTypeDef * uart);
 /***************************************************************/
 /***************************************************************/
 
+//	Power= 3V3 or 5V
 //	DQ_WRITE	GPIO_Output;	Pull_up;	Open Drain;		level:High;		speed:High;		PA1
 //	DQ_READ		GPIO_Input;		Pull_up;													PA0
 
