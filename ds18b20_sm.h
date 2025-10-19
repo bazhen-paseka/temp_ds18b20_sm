@@ -7,6 +7,7 @@
 	#include "main.h"
 	#include "debug_gx.h"
 	#include "local_config.h"
+
 /***************************************************************/
 
 	#define	READ_ROM			0x33
@@ -26,7 +27,10 @@
 	#define SERIAL_NUMB_SIZE	8
 
 /***************************************************************/
-	void	Ds18b20_Init_DWT_Delay			(void);
+	// Якщо не буде працювати (видавати 0xFF), то треба перевірити таймінг in Read_byte()
+ 	//		char serial_number[SERIAL_NUMB_SIZE] = {0};
+	void	Ds18b20_Init_DWT_Delay			(void);	// see debug_gx.h
+	void 	Ds18b20_Get_serial_number		(char * _serial_numb);
 	void 	Ds18b20_Print_serial_number		(void);
 	void	Ds18b20_ConvertTemp_SkipROM 	(void);
 	int 	Ds18b20_Get_Temp_SkipROM 		(void);
