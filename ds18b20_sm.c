@@ -13,6 +13,7 @@
 	void 	Send_byte 					(uint8_t _byte);
 	void 	Send_bit					(uint8_t _bit);
 	uint8_t Read_byte					(void);
+	uint8_t Ds18b20_Read_Bit			(void);
 	uint8_t Start_strob					(void);
 	void 	Dwt_Delay					(uint32_t _delay_u32);
 	void 	Set_DQ_Pin_Write			(void);
@@ -118,20 +119,24 @@ void Ds18b20_ConvertTemp_SkipROM (void) {
 }
 /***************************************************************/
 
+uint8_t Ds18b20_Read_Bit (void) {
+    uint8_t bit = 0;
+    // Початок слота читання: коротко притиснути до 0
+    HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+    DWT_Delay_us(6);
+    HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+    DWT_Delay_us(9);  // Чекати, поки slave відповість
+    bit = HAL_GPIO_ReadPin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin);
+    DWT_Delay_us(55);  // Завершити слот
+    return bit;
+}  /***************************************************************/
+
 uint8_t Read_byte(void) {
 	uint8_t read_byte_u8 = 0xFF;
 	for (int i = 0; i < BIT_IN_BYTE; i++) {
-		Set_DQ_Pin_Write();
-		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
-		Dwt_Delay(2);
-		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
-		Set_DQ_Pin_Read();
-		Dwt_Delay(6);
-		GPIO_PinState res = HAL_GPIO_ReadPin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin);
-		if (res == GPIO_PIN_RESET){
+		if (Ds18b20_Read_Bit() == 0){
 			CLR_BIT(read_byte_u8,i);
 		}
-		Dwt_Delay(51);
 	}
 	return read_byte_u8;
 } /***************************************************************/
@@ -143,12 +148,25 @@ void Send_byte (uint8_t _byte) {
 } /***************************************************************/
 
 void Send_bit (uint8_t _bit) {
-	Set_DQ_Pin_Write();
-	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
-	Dwt_Delay(58 - _bit * 50);
-	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
-	Set_DQ_Pin_Read();
-	Dwt_Delay(67 + _bit * 50);
+//	Set_DQ_Pin_Write();
+//	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+//	Dwt_Delay(58 - _bit * 50);
+//	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+//	Set_DQ_Pin_Read();
+//	Dwt_Delay(67 + _bit * 50);
+	if (_bit == 1) {
+		// Лог. 1: коротко притиснути до 0, потім відпустити (таймінг 1-Wire)
+		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		DWT_Delay_us(6);  // Приклад таймінгу, налаштуйте під протокол
+		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		DWT_Delay_us(64);
+	} else {
+		// Лог. 0: притиснути до 0 довше
+		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		DWT_Delay_us(60);
+		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		DWT_Delay_us(10);
+	}
 }/***************************************************************/
 
 uint8_t Start_strob(void) {
@@ -193,20 +211,22 @@ void Dwt_Delay(uint32_t _delay_u32) {
 } /***************************************************************/
 
 void Set_DQ_Pin_Write() {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin  	= DS18B20_DQ_Pin;
-    GPIO_InitStruct.Mode 	= GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStruct.Pull 	= GPIO_PULLUP;
-    GPIO_InitStruct.Speed	= GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+//    GPIO_InitTypeDef GPIO_InitStruct = {0};
+//    GPIO_InitStruct.Pin  	= DS18B20_DQ_Pin;
+//    GPIO_InitStruct.Mode 	= GPIO_MODE_OUTPUT_OD;
+//    GPIO_InitStruct.Pull 	= GPIO_PULLUP;
+//    GPIO_InitStruct.Speed	= GPIO_SPEED_FREQ_HIGH;
+//    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+    //GPIOB->MODER = (GPIOB->MODER & ~(3UL << 26)) | (1UL << 26);
 } /***************************************************************/
 
 void Set_DQ_Pin_Read() {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin   	= DS18B20_DQ_Pin;
-    GPIO_InitStruct.Mode  	= GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull	= GPIO_PULLUP;
-    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+//    GPIO_InitTypeDef GPIO_InitStruct = {0};
+//    GPIO_InitStruct.Pin   	= DS18B20_DQ_Pin;
+//    GPIO_InitStruct.Mode  	= GPIO_MODE_INPUT;
+//    GPIO_InitStruct.Pull	= GPIO_PULLUP;
+//    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+    //GPIOB->MODER &= ~(3UL << 26);
 } /***************************************************************/
 
 /***************************************************************/
