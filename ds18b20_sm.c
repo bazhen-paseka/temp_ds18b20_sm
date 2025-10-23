@@ -4,15 +4,16 @@
 
 /***************************************************************/
 
-	uint8_t Ds18b20_CRC8				(uint8_t *addr, uint8_t len);
-	void 	Read_Scratchpad_Match_ROM	(char * _scratchpad, char * _serial_numb);
-	void 	Read_Scratchpad_Skip_ROM	(char * _scratchpad);
-	void 	Send_serial					(char * _serial_numb);
-	void 	Read_serial					(char * _serial_numb);
-	void 	Read_Scratchpad				(char * _scratchpad);
+	uint8_t Ds18b20_CRC8				(uint8_t* addr, uint8_t len);
+	void 	Read_Scratchpad_Match_ROM	(uint8_t* _scratchpad, uint8_t* _serial_numb);
+	void 	Read_Scratchpad_Skip_ROM	(uint8_t* _scratchpad);
+	void 	Send_serial					(uint8_t* _serial_numb);
+	void 	Read_serial					(uint8_t* _serial_numb);
+	void 	Read_Scratchpad				(uint8_t* _scratchpad);
 	void 	Send_byte 					(uint8_t _byte);
 	void 	Send_bit					(uint8_t _bit);
 	uint8_t Read_byte					(void);
+	uint8_t Ds18b20_Read_Bit			(void);
 	uint8_t Start_strob					(void);
 	void 	Dwt_Delay					(uint32_t _delay_u32);
 	void 	Set_DQ_Pin_Write			(void);
@@ -40,14 +41,14 @@ uint8_t Ds18b20_CRC8(uint8_t *addr, uint8_t len) {
 	return crc;
 } /***************************************************************/
 
-int Ds18b20_Get_temp_MatchROM(char * _serial_numb) {
-	char scratchpad[9];
+int Ds18b20_Get_temp_MatchROM (uint8_t* _serial_numb) {
+	uint8_t scratchpad[9];
 	Read_Scratchpad_Match_ROM(scratchpad, _serial_numb);
 	return (100 * ((scratchpad[1]<<8) | scratchpad[0]))/16;
 } /***************************************************************/
 
-int Ds18b20_Get_Temp_SkipROM(void) {
-	char scratchpad[9];
+int Ds18b20_Get_Temp_SkipROM (void) {
+	uint8_t scratchpad[9];
 	Read_Scratchpad_Skip_ROM(scratchpad);
 //	uint8_t crc1 = scratchpad[8];
 //	uint8_t crc2 = DS18B20_CRC8( (uint8_t*)scratchpad ,8);
@@ -58,8 +59,8 @@ int Ds18b20_Get_Temp_SkipROM(void) {
 	return (temp_int * 100)/16;
 } /***************************************************************/
 
-void Ds18b20_Print_serial_number(void) {
-	char serial_number[SERIAL_NUMB_SIZE] = {0};
+void Ds18b20_Print_serial_number (void) {
+	uint8_t serial_number[SERIAL_NUMB_SIZE] = {0};
 	DBG2("ds18b20.serial.number: { ");
 	Ds18b20_Get_serial_number(serial_number);
 	for (int i=0; i<8; i++) {
@@ -68,7 +69,7 @@ void Ds18b20_Print_serial_number(void) {
 	DBG2("}\r\n");
 } /***************************************************************/
 
-void Ds18b20_Get_serial_number(char * _serial_numb) {
+void Ds18b20_Get_serial_number (uint8_t* _serial_numb) {
 	memset(_serial_numb, 0xFF, SERIAL_NUMB_SIZE);
 	uint8_t present = Start_strob();
 	if (present){
@@ -77,7 +78,7 @@ void Ds18b20_Get_serial_number(char * _serial_numb) {
 	}
 } /***************************************************************/
 
-void Read_Scratchpad_Match_ROM(char * _scratchpad, char * _serial_numb){
+void Read_Scratchpad_Match_ROM (uint8_t* _scratchpad, uint8_t* _serial_numb){
 	memset(_scratchpad, 0xFF, SCRATCHPAD_SIZE);
 	uint8_t present = Start_strob();
 	if (present){
@@ -88,7 +89,7 @@ void Read_Scratchpad_Match_ROM(char * _scratchpad, char * _serial_numb){
 	}
 } /***************************************************************/
 
-void Read_Scratchpad_Skip_ROM(char * _scratchpad) {
+void Read_Scratchpad_Skip_ROM (uint8_t* _scratchpad) {
 	memset(_scratchpad, 0xFF, SCRATCHPAD_SIZE);
 	uint8_t present = Start_strob();
 	if (present){
@@ -99,7 +100,7 @@ void Read_Scratchpad_Skip_ROM(char * _scratchpad) {
 }
 /***************************************************************/
 
-void Ds18b20_ConvertTemp_MatchROM( char * _serial_numb) {
+void Ds18b20_ConvertTemp_MatchROM (uint8_t* _serial_numb) {
 	uint8_t present = Start_strob();
 	if (present) {
 		Send_byte(MATCH_ROM);
@@ -118,7 +119,26 @@ void Ds18b20_ConvertTemp_SkipROM (void) {
 }
 /***************************************************************/
 
+uint8_t Ds18b20_Read_Bit (void) {
+    uint8_t bit = 0;
+    // Початок слота читання: коротко притиснути до 0
+    HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+    DWT_Delay_us(6);
+    HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+    DWT_Delay_us(9);  // Чекати, поки slave відповість
+    bit = HAL_GPIO_ReadPin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin);
+    DWT_Delay_us(55);  // Завершити слот
+    return bit;
+}  /***************************************************************/
+
 uint8_t Read_byte(void) {
+		//	uint8_t read_byte_u8 = 0xFF;
+		//	for (int i = 0; i < BIT_IN_BYTE; i++) {
+		//		if (Ds18b20_Read_Bit() == 0){
+		//			CLR_BIT(read_byte_u8,i);
+		//		}
+		//	}
+		//	return read_byte_u8;
 	uint8_t read_byte_u8 = 0xFF;
 	for (int i = 0; i < BIT_IN_BYTE; i++) {
 		Set_DQ_Pin_Write();
@@ -143,6 +163,26 @@ void Send_byte (uint8_t _byte) {
 } /***************************************************************/
 
 void Send_bit (uint8_t _bit) {
+		////	Set_DQ_Pin_Write();
+		////	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		////	Dwt_Delay(58 - _bit * 50);
+		////	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		////	Set_DQ_Pin_Read();
+		////	Dwt_Delay(67 + _bit * 50);
+		//	if (_bit == 1) {
+		//		// Лог. 1: коротко притиснути до 0, потім відпустити (таймінг 1-Wire)
+		//		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		//		DWT_Delay_us(6);  // Приклад таймінгу, налаштуйте під протокол
+		//		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		//		DWT_Delay_us(64);
+		//	} else {
+		//		// Лог. 0: притиснути до 0 довше
+		//		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		//		DWT_Delay_us(60);
+		//		HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		//		DWT_Delay_us(10);
+		//	}
+
 	Set_DQ_Pin_Write();
 	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
 	Dwt_Delay(58 - _bit * 50);
@@ -151,7 +191,20 @@ void Send_bit (uint8_t _bit) {
 	Dwt_Delay(67 + _bit * 50);
 }/***************************************************************/
 
-uint8_t Start_strob(void){
+uint8_t Start_strob(void) {
+		//	Set_DQ_Pin_Write();
+		//	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
+		//	Dwt_Delay(720);
+		//	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_SET);
+		//	Set_DQ_Pin_Read();
+		//	Dwt_Delay(100);
+		//	GPIO_PinState res = HAL_GPIO_ReadPin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin);
+		//	if (res == GPIO_PIN_RESET){
+		//		Dwt_Delay(259);
+		//		return 1; // present
+		//	}
+		//	return 0; // no answer
+
 	Set_DQ_Pin_Write();
 	HAL_GPIO_WritePin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin, GPIO_PIN_RESET);
 	Dwt_Delay(720);
@@ -166,19 +219,19 @@ uint8_t Start_strob(void){
 	return 0; // no answer
 } /***************************************************************/
 
-void Read_serial(char * _serial_numb) {
+void Read_serial(uint8_t* _serial_numb) {
 	for (int i = 0; i < SERIAL_NUMB_SIZE; i++) {
 		_serial_numb[i] = Read_byte();
 	}
 } /***************************************************************/
 
-void Read_Scratchpad(char * _scratchpad) {
+void Read_Scratchpad(uint8_t* _scratchpad) {
 	for (int i = 0; i < SCRATCHPAD_SIZE; i++) {
 		_scratchpad[i] = Read_byte();
 	}
 } /***************************************************************/
 
-void Send_serial( char * _serial_numb) {
+void Send_serial( uint8_t * _serial_numb) {
 	for (int i = 0; i < SERIAL_NUMB_SIZE; i++) {
 		Send_byte(_serial_numb[i]);
 	}
@@ -199,14 +252,16 @@ void Set_DQ_Pin_Write() {
     GPIO_InitStruct.Pull 	= GPIO_PULLUP;
     GPIO_InitStruct.Speed	= GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+    //GPIOB->MODER = (GPIOB->MODER & ~(3UL << 26)) | (1UL << 26);
 } /***************************************************************/
 
 void Set_DQ_Pin_Read() {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin   	= DS18B20_DQ_Pin;
-    GPIO_InitStruct.Mode  	= GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull	= GPIO_PULLUP;
-    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+//    GPIO_InitTypeDef GPIO_InitStruct = {0};
+//    GPIO_InitStruct.Pin   	= DS18B20_DQ_Pin;
+//    GPIO_InitStruct.Mode  	= GPIO_MODE_INPUT;
+//    GPIO_InitStruct.Pull	= GPIO_PULLUP;
+//    HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
+    //GPIOB->MODER &= ~(3UL << 26);
 } /***************************************************************/
 
 /***************************************************************/
