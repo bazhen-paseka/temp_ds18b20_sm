@@ -27,8 +27,7 @@
 	#define SERIAL_NUMB_SIZE	8
 
 /***************************************************************/
-	// Якщо не буде працювати (видавати 0xFF), то треба перевірити таймінг in Read_byte()
- 	//		char serial_number[SERIAL_NUMB_SIZE] = {0};
+
 	void	Ds18b20_Init_DWT_Delay			(void);	// see debug_gx.h
 	void 	Ds18b20_Get_serial_number		(uint8_t* _serial_numb);
 	void 	Ds18b20_Print_serial_number		(void);
@@ -40,12 +39,16 @@
 /***************************************************************/
 /***************************************************************/
 
-//	Power= 3V3 or 5V
-//	DQ_WRITE	GPIO_Output;	Pull_up;	Open Drain;		level:High;		speed:High;		PA1
-//	DQ_READ		GPIO_Input;		Pull_up;													PA0
+// 		!!!		Якщо не буде працювати (видавати 0xFF), то треба перевірити таймінг in Read_byte() 	!!!
 
-//		char serial_number[8] = {0x28, 0xFF, 0x55, 0x64, 0x4C, 0x04, 0x00, 0x20};
-//		char serial_number[8];
-//		Ds18b20_Print_serial_number(&huart1);
+//		Power= 3V3 or 5V
+//		DS18B20_DQ		PB13	GPIO_Output;	Open Drain;
+//		DS18B20_3V3		PB12	GPIO_Input;		Pull_up; Допоміжне, якщо немаж піддтяжки до 3V3
+
+//		EXAMPLE:
+//		uint8_t serial_number[8] = {0x28, 0xFF, 0x55, 0x64, 0x4C, 0x04, 0x00, 0x20};
+//		Ds18b20_Init_DWT_Delay();
+//		Ds18b20_Print_serial_number();
+//		Ds18b20_Get_serial_number(serial_number);
 
 #endif	//	TEMP_DS18B20_SM_H_INCLUDED
